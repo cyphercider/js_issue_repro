@@ -4,8 +4,8 @@
 
 ## Versions to reproduce
 
-Dgraph 1.0.2
-dgraph-js 1.0.4
+* Dgraph 1.0.2
+* dgraph-js 1.0.4
 
 ## To run example
 
