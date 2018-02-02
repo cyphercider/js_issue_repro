@@ -1,8 +1,14 @@
-# Versions
+# Reproduction of dgraph-js issue #21
+
+[https://github.com/dgraph-io/dgraph-js/issues/21](https://github.com/dgraph-io/dgraph-js/issues/21)
+
+## Versions to reproduce
 
 Dgraph 1.0.2
 dgraph-js 1.0.4
 
-# to run example:
+## To run example
 
-npm run issue21 [your dgraph host:grpc port]
+`npm install`
+
+`npm run issue21 [your dgraph host:grpc port]`

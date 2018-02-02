@@ -10,26 +10,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const dgraph = require("dgraph-js");
 const grpc = require("grpc");
+/**
+ * Create schema as existed in the initial example (string list, hash index)
+ */
 function configureTestSchema(client, testPredicate) {
     return __awaiter(this, void 0, void 0, function* () {
-        const schema = `${testPredicate}: string @index(hash) .`;
+        const schema = `${testPredicate}: [string] @index(hash) .`;
         const op = new dgraph.Operation();
         op.setSchema(schema);
         yield client.alter(op);
     });
 }
+/**
+ * get new UID for testing
+ */
 function getNewItemUid(client, testPredicate) {
     return __awaiter(this, void 0, void 0, function* () {
         const txn = client.newTxn();
         try {
             const mu = new dgraph.Mutation();
-            mu.setSetNquads(`_:newItem <${testPredicate}> "testInitialValue" .`);
+            mu.setSetNquads(`_:newItem <${testPredicate}> "initial value" .`);
             const assigned = yield txn.mutate(mu);
             const uidMap = assigned.getUidsMap();
             const uid = uidMap.map_['newItem'].value;
             yield txn.commit();
-            console.log(`uids: ${uid}`);
-            console.log(JSON.stringify(uidMap));
+            console.log(`*** New test item uid: ${uid} ***`);
             return uid;
         }
         catch (err) {
@@ -37,6 +42,9 @@ function getNewItemUid(client, testPredicate) {
         }
     });
 }
+/**
+ * Query the test predicate value for a uid
+ */
 function queryItemPredicateValue(client, testPredicate, uid) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = `
@@ -61,22 +69,22 @@ function queryItemPredicateValue(client, testPredicate, uid) {
         }
     });
 }
+/**
+ * Run full example
+ */
 function runIssue21Example() {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(`*** Running dgraph-js github issue #21 repro ***`);
         const testPredicate = 'property.test';
         let dgraphAddress;
         try {
             dgraphAddress = process.argv[2];
-            console.log(`using dgraph address ${dgraphAddress}`);
+            console.log(`*** Dgraph address ${dgraphAddress} ***`);
         }
         catch (err) {
             console.log(`please pass the dgraph address as an argument`);
         }
-        const clientStub = new dgraph.DgraphClientStub(
-        // addr: optional, default: "localhost:9080"
-        dgraphAddress, 
-        // credentials: optional, default: grpc.credentials.createInsecure()
-        grpc.credentials.createInsecure());
+        const clientStub = new dgraph.DgraphClientStub(dgraphAddress, grpc.credentials.createInsecure());
         const client = new dgraph.DgraphClient(clientStub);
         try {
             yield configureTestSchema(client, testPredicate);
@@ -86,13 +94,15 @@ function runIssue21Example() {
         }
         let itemUid;
         try {
+            console.log(`*** Creating test data ***`);
             itemUid = yield getNewItemUid(client, testPredicate);
         }
         catch (err) {
             console.log(`Error getting test item uid`);
         }
         const valueBeforeMutation = yield queryItemPredicateValue(client, testPredicate, itemUid);
-        console.log(`Value before two-part transaction (delete / set): ` + JSON.stringify(valueBeforeMutation));
+        console.log(`*** Value before delete / set transaction (predicate should contain value "initial value"): 
+    ${JSON.stringify(valueBeforeMutation.res)}`);
         const txn = client.newTxn();
         try {
             const mu1 = new dgraph.Mutation();
@@ -102,6 +112,7 @@ function runIssue21Example() {
             mu2.setSetNquads(`<${itemUid}> <${testPredicate}> "rewritten value" .`);
             yield txn.mutate(mu2);
             yield txn.commit();
+            console.log(`*** Txn committed ***`);
         }
         catch (err) {
             console.log(`Error running mutations: ${err}`);
@@ -110,9 +121,10 @@ function runIssue21Example() {
             yield txn.discard();
         }
         const valueAfterMutation = yield queryItemPredicateValue(client, testPredicate, itemUid);
-        console.log(`Value after two-part transaction (delete / set): ` + JSON.stringify(valueAfterMutation));
+        console.log(`*** Value after delete / set transaction (predicate should contain value "rewritten value"): 
+    ${JSON.stringify(valueAfterMutation.res)}`);
         yield clientStub.close();
-        console.log(`committed txn`);
+        console.log(`*** Done ***`);
     });
 }
 runIssue21Example();
