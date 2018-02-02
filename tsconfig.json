@@ -1,0 +1,24 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "allowUnreachableCode": true,
+    "module": "commonjs",
+    "target": "es6",
+    "noImplicitAny": false,
+    "watch": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": false,
+    "noUnusedParameters": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "lib": ["es2016", "dom"],
+    "baseUrl": "./",
+    "paths": {
+      "*": ["./dgraph-js/*"]
+    }
+  },
+  "include": ["dgraph-js/**/*.ts"],
+  "exclude": ["node_modules"]
+}
