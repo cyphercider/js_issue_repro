@@ -1,0 +1,13 @@
+{
+  "extends": "tslint-config-standard",
+  "rules": {
+    "space-before-function-paren": false,
+    "trailing-comma": [false],
+    "no-trailing-whitespace": false,
+    "quotemark": [false],
+    "eofline": false,
+    "triple-equals": false,
+    "no-empty": false,
+    "whitespace": [false]
+  }
+}
