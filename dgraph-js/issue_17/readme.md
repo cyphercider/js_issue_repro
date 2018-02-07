@@ -1,4 +1,4 @@
-# Reproduction of dgraph-js issue #21
+# Reproduction of dgraph-js issue #17
 
 [https://github.com/dgraph-io/dgraph-js/issues/17](https://github.com/dgraph-io/dgraph-js/issues/17)
 
